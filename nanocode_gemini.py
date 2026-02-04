@@ -68,6 +68,11 @@ def tool_preview_args(name):
 
     return ret
 
+def tool_preview_file_content(arg: str, data: str):
+    print(f"    {arg}=\"\"\"")
+    print("\n".join(f"    {line}" for line in data.splitlines()))
+    print("    \"\"\"", end="")
+
 def read(args):
     lines = open(args["path"]).readlines()
     offset = args.get("offset", 0)
@@ -81,9 +86,9 @@ def write(args):
     return "ok"
 
 def write_preview(args):
-    print(f"\n{GREEN}⏺ write{RESET}({DIM}path={args["path"]},\n    content=\"\"\"")
-    print("\n".join(f"  {line}" for line in args["content"].splitlines()))
-    print("    \"\"\"{RESET}\n  )")
+    print(f"\n{GREEN}⏺ write{RESET}({DIM}path={args["path"]},")
+    tool_preview_file_content("content", args["content"])
+    print("{RESET}\n  )")
 
 def edit(args):
     text = open(args["path"]).read()
@@ -99,14 +104,14 @@ def edit(args):
     return "ok"
 
 def edit_preview(args):
-    print(f"\n{GREEN}⏺ edit{RESET}({DIM}path={args["path"]},\n    old=\"\"\"")
-    print("\n".join(f"  {line}" for line in args["old"].splitlines()))
-    print("    \"\"\",\n    new=\"\"\"")
-    print("\n".join(f"  {line}" for line in args["new"].splitlines()))
+    print(f"\n{GREEN}⏺ edit{RESET}({DIM}path={args["path"]},")
+    tool_preview_file_content("old", args["old"])
+    print(",\n")
+    tool_preview_file_content("new", args["new"])
     if args.get("all"):
-        print("    \"\"\",\n    all=true{RESET}\n  )")
+        print(",\n    all=true{RESET}\n  )")
     else:
-        print("    \"\"\"{RESET}\n  )")
+        print("{RESET}\n  )")
 
 def glob(args):
     pattern = (args.get("path", ".") + "/" + args["pat"]).replace("//", "/")
