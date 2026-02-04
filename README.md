@@ -16,6 +16,7 @@ Besides Claude models the original codebase supports, the adaptation adds suppor
 
 - Full agentic loop with tool use
 - Tools: `read`, `write`, `edit`, `glob`, `grep`, `bash`, `web_search`, and `web_get` (the web search tools are additionally introduced and they are **free** to use by leveraging duckduckgo search engine)
+  - Tools have "danger levels" and user can configure what tools AI model can use without confirmation and for which confirmation prompt is shown to user (via `--safe_tools`).
 - Conversation history
   - Automatically saved to `chat_history/` (can be disabled with `--not_save_history`)
 
@@ -67,22 +68,22 @@ python nanocode_vllm.py
 ## Commands
 
 - `/c` - Clear conversation
-- `/q` or `exit` - Quit
+- `/q`, `/quit`, `quit`, `/exit`, `exit` - Quit
 
 
 
 ## Tools
 
-| Tool | Description |
-|------|-------------|
-| `read` | Read file with line numbers, offset/limit |
-| `write` | Write content to file |
-| `edit` | Replace string in file (must be unique) |
-| `glob` | Find files by pattern, sorted by mtime |
-| `grep` | Search files for regex |
-| `bash` | Run shell command |
-| `web_search` | Perform web search using duckduckgo |
-| `web_get` | Fetch a webpage and return plain text |
+| Tool | Description | Safety |
+|------|-------------|--------|
+| `read` | Read file with line numbers, offset/limit | Sensitive |
+| `write` | Write content to file | Dangerous |
+| `edit` | Replace string in file (must be unique) | Dangerous |
+| `glob` | Find files by pattern, sorted by mtime | Sensitive |
+| `grep` | Search files for regex | Sensitive |
+| `bash` | Run shell command | Dangerous |
+| `web_search` | Perform web search using duckduckgo | Safe |
+| `web_get` | Fetch a webpage and return plain text | Safe |
 
 
 
