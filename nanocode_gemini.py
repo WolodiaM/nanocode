@@ -315,7 +315,7 @@ def is_tool_safe_to_call(tool, args, allowed: str) -> (bool, str):
             return (True, "")
         elif tool[4] == "command":
             if not any(e in args["cmd"] for e in [";", "&", "|", ">", "<", "\n", "\r", "`", "$("]):
-                if any(re.compile(f"^{e}$").match(args["cmd"]) for e in SENSITIVE_COMMANDS):
+                if any(re.compile(e).fullmatch(args["cmd"]) for e in SENSITIVE_COMMANDS):
                     return (True, "")
     elif allowed == "safe" and tool[4] == "safe":
         return (True, "")
