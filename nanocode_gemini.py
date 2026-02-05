@@ -53,6 +53,17 @@ BLUE, CYAN, GREEN, YELLOW, RED = (
 OAUTH2_SCOPES = ["https://www.googleapis.com/auth/generative-language.retriever"]
 OAUTH2_CREDENTIALS_FILE = "token.json"
 
+# Commands that are considered sensitive, not dangerous
+SENSITIVE_COMMANDS = [
+    "ls( .*)?",
+    "pwd",
+    "which( .*)?",
+    "git (diff|status|branch|show|remote)( .*)?",
+    "file( .*)?",
+    "du( .*)?",
+    "stat( .*)?"
+]
+
 # --- time helpers ---
 
 def now_iso() -> str:
@@ -274,7 +285,7 @@ TOOLS = {
         {"cmd": "string"},
         bash,
         tool_preview_args("bash"),
-        "dangerous",
+        "command",
     ),
     "web_search": (
         "Search the web and return top results as numbered list",
@@ -297,21 +308,25 @@ def is_tool_safe_to_call(tool, args, allowed: str) -> (bool, str):
     Check if tool is safe to call without confirmation.
     If not ask user to verify tool call.
     """
-    if allowed == "dangerous":
+    if allowed == "dangerous": # Allow all tools
         return (True, "")
-    elif allowed == "sensitive" and (tool[4] == "sensitive" or tool[4] == "safe"):
-        return (True, "")
+    elif allowed == "sensitive":
+        if tool[4] == "sensitive" or tool[4] == "safe":
+            return (True, "")
+        elif tool[4] == "command":
+            if not any(e in args["cmd"] for e in [";", "&", "|", ">", "<", "\n", "\r", "`", "$("]):
+                if any(re.compile(f"^{e}$").match(args["cmd"]) for e in SENSITIVE_COMMANDS):
+                    return (True, "")
     elif allowed == "safe" and tool[4] == "safe":
         return (True, "")
-    else:
-        while True:
-            user_input = input(f"Run tool (Yes/no/<reason>): ").lower().strip()
-            if user_input in ["yes", "y", ""]:  # Default option
-                return (True, "")
-            elif user_input in ["no", "n"]:
-                return (False, "User rejected tool invocation.")
-            else:
-                return (False, f"User rejected tool invocation with message: {user_input}")
+    while True:
+        user_input = input(f"Run tool (Yes/no/<reason>): ").lower().strip()
+        if user_input in ["yes", "y", ""]:  # Default option
+            return (True, "")
+        elif user_input in ["no", "n"]:
+            return (False, "User rejected tool invocation.")
+        else:
+            return (False, f"User rejected tool invocation with message: {user_input}")
 
 def run_tool(name, args, safe_tools):
     """

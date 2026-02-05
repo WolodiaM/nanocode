@@ -1,6 +1,6 @@
 # nanocode
 
-Minimal Claude Code alternatives, adapted from [this repo](https://github.com/1rgs/nanocode). Each script is a single Python file with zero external dependencies (~250-721 lines).
+Minimal Claude Code alternatives, adapted from [this repo](https://github.com/1rgs/nanocode). Each script is a single Python file with zero external dependencies (~250-737 lines).
 
 Besides Claude models the original codebase supports, the adaptation adds support for GPT models from OpenAI, Gemini models from Google, and open-weight models supported by [vllm](https://github.com/vllm-project/vllm/tree/main) hosted via OpenAI Chat Completions API. Below are demonstrations of the four types of models that come with this repo. 
 
@@ -16,7 +16,7 @@ Besides Claude models the original codebase supports, the adaptation adds suppor
 
 - Full agentic loop with tool use
 - Tools: `read`, `write`, `edit`, `glob`, `grep`, `bash`, `web_search`, and `web_get` (the web search tools are additionally introduced and they are **free** to use by leveraging duckduckgo search engine)
-  - Tools have "danger levels" and user can configure what tools AI model can use without confirmation and for which confirmation prompt is shown to user (via `--safe_tools`).
+  - Tools have "danger levels" and user can configure what tools AI model can use without confirmation and for which confirmation prompt is shown to user (via `--safe_tools`). For `bash` tool custom level is used because some commands can be marked as having "sensitive" level via `SENSITIVE_COMMANDS`.
 - Conversation history
   - Automatically saved to `chat_history/` (can be disabled with `--not_save_history`)
 
@@ -116,7 +116,7 @@ python nanocode_vllm.py
 | `edit` | Replace string in file (must be unique) | Dangerous |
 | `glob` | Find files by pattern, sorted by mtime | Sensitive |
 | `grep` | Search files for regex | Sensitive |
-| `bash` | Run shell command | Dangerous |
+| `bash` | Run shell command | Command |
 | `web_search` | Perform web search using duckduckgo | Safe |
 | `web_get` | Fetch a webpage and return plain text | Safe |
 
