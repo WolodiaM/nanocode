@@ -53,6 +53,14 @@ If you want to log in via your Google account to enjoy higher limits for a free 
 
 `code-assist` seems to be provided trough internal APIs, and "specifications" were extracted from gemini-cli. Setup of google-cloud project seems to be constant with [this](https://geminicli.com/docs/get-started/authentication/#set-your-google-cloud-project). But default works too (via `cloudshell-gca` project ID). Default client ID and client secret can be extracted from gemini-cli repo from variables `OAUTH_CLIENT_ID` and `OAUTH_CLIENT_SECRET` (file `packages/core/src/code_assist/oauth2.ts`).
 
+##### gemini-cli credentials
+
+These data is public anyway, so I think it is not a problem to write it here, this values allow to pretty easily register nanocode\_gemini as oogle Code Assist:
+- `OAUTH_CLIENT_ID`: `681255809395-oo8ft2oprdrnp9e3aqf6av3hmdib135j.apps.googleusercontent.com`
+- `OAUTH_CLIENT_SECRET`: `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`
+
+For project ID you may use your own (described below or [here](https://geminicli.com/docs/get-started/authentication/#set-your-google-cloud-project)), or just rely on default `cloudshell-gca` project id (same as fallback in gemini-cli). Both ways are tested.
+
 ##### Creating client\_secret.json
 
 This is based on [rclone's "tutorial"](https://rclone.org/drive/#making-your-own-client-id).
