@@ -543,7 +543,7 @@ def gemini_generate_content(
                         timeout = float(match.group(1))
                     break
 
-            print(f"\n{YELLOW}⏺ Rate-limited, waiting {timeout}s ({error["message"]}){RESET}")
+            print(f"\n{YELLOW}⏺ Rate-limited: {error["message"]}{RESET}")
             time.sleep(timeout + 0.01) # Add a little delay on top because otherwise rate-limiting comes twice in a row
             return gemini_generate_content(
                 contents,
