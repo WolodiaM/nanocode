@@ -252,7 +252,7 @@ def web_get(args):
 
 TOOLS = {
     "read": (
-        "Read file with line numbers (file path, not directory)",
+        "Read file with line numbers (file path, not directory). 'offset' specifies first line that will be read and 'limit' specifies number of lines that will be read.",
         {"path": "string", "offset": "number?", "limit": "number?"},
         read,
         tool_preview_args("read"),
