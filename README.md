@@ -55,7 +55,7 @@ If you want to log in via your Google account to enjoy higher limits for a free 
 
 ##### gemini-cli credentials
 
-These data is public anyway, so I think it is not a problem to write it here, this values allow to pretty easily register nanocode\_gemini as oogle Code Assist:
+These data is public anyway, so I think it is not a problem to write it here, this values allow to pretty easily register nanocode\_gemini as Google Code Assist:
 - `OAUTH_CLIENT_ID`: `681255809395-oo8ft2oprdrnp9e3aqf6av3hmdib135j.apps.googleusercontent.com`
 - `OAUTH_CLIENT_SECRET`: `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`
 
