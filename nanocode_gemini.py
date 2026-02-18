@@ -418,7 +418,7 @@ def gemini_get_oauth2_credentials(scopes):
 def load_code_assist(creds):
     """
      Calls:
-        POST https://cloudcode-ppa.googleapis.com/v1internal:loadCodeAssist
+        POST https://cloudcode-pa.googleapis.com/v1internal:loadCodeAssist
      """
     url = f"{CODE_ASSIST_API_BASE}:loadCodeAssist"
     headers = {
