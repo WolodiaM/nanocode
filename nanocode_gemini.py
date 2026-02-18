@@ -44,8 +44,8 @@ DEFAULT_MODEL = "gemini-3-flash-preview"
 GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta"
 # Gemini code_assist REST endpoint (v1internal)
 CODE_ASSIST_API_BASE = "https://cloudcode-pa.googleapis.com/v1internal"
-# Helper for code assist
-CODE_ASSIST_CACHE: Dict[str, any] = {"session_id": uuid.uuid4() }
+# Cache used for code-assists and oauth2
+CACHE: Dict[str, any] = {"session_id": uuid.uuid4() }
 # OAuth2 credentials
 GEMINI_OAUTH2_SCOPES = ["https://www.googleapis.com/auth/generative-language.retriever"]
 CODE_ASSIST_OAUTH2_SCOPES = ["https://www.googleapis.com/auth/cloud-platform", "https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile", "openid"]
@@ -435,7 +435,7 @@ def load_code_assist(creds):
     }
     project_id = os.environ.get("GOOGLE_CLOUD_PROJECT") or None
     if  project_id:
-        body["cloudaicompanionProject"] = project_id,
+        body["cloudaicompanionProject"] = project_id
     req = urllib.request.Request(
         url,
         data=json.dumps(body).encode("utf-8"),
@@ -457,11 +457,11 @@ def gemini_generate_content_code_assist(
       POST https://cloudcode-pa.googleapis.com/v1internal:generateContent
     """
     creds = gemini_get_oauth2_credentials(CODE_ASSIST_OAUTH2_SCOPES)
-    if not CODE_ASSIST_CACHE.get("project_id"):
+    if not CACHE.get("project_id"):
         load_response = load_code_assist(creds)
         if not load_response.get("currentTier"):
             raise RuntimeError(f"User is not onboarded. This is  not supported. Try to use code-assist on this account inn any of the official integrations first, after login there this should work in nanocode.")
-        CODE_ASSIST_CACHE["project_id"] = load_response.get("cloudaicompanionProject")
+        CACHE["project_id"] = load_response.get("cloudaicompanionProject")
     url = f"{CODE_ASSIST_API_BASE}:generateContent"
     headers = {
         "Content-Type": "application/json",
@@ -469,8 +469,8 @@ def gemini_generate_content_code_assist(
         "User-Agent": f"GeminiCLI/0.29.0/{model} (linux; x64)" # Mimic the CLI's user agent
     }
     request = {
-        "session_id": str(CODE_ASSIST_CACHE.get("session_id")),
-        "systemInstruction": {"role": "user", "parts": {"text": system_prompt}},
+        "session_id": str(CACHE.get("session_id")),
+        "systemInstruction": {"role": "user", "parts": [{"text": system_prompt}]},
         "contents": contents,
         "generationConfig": {"maxOutputTokens": int(max_output_tokens)},
         "tools": [{"function_declarations": make_function_declarations()}],
@@ -478,7 +478,7 @@ def gemini_generate_content_code_assist(
     }
     body = {
         "model": model,
-        "project": CODE_ASSIST_CACHE.get("project_id"),
+        "project": CACHE.get("project_id"),
         "user_prompt_id": str(uuid.uuid4()),
         "request": request,
     }
