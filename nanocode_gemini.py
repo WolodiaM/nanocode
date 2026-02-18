@@ -442,7 +442,7 @@ def load_code_assist(creds):
         headers=headers,
         method="POST",
     )
-    with urllib.request.urlopen(req) as resp:
+    with urllib.request.urlopen(req, timeout=60) as resp:
         return json.loads(resp.read().decode("utf-8"))
 
 def gemini_generate_content_code_assist(
@@ -460,7 +460,7 @@ def gemini_generate_content_code_assist(
     if not CACHE.get("project_id"):
         load_response = load_code_assist(creds)
         if not load_response.get("currentTier"):
-            raise RuntimeError(f"User is not onboarded. This is  not supported. Try to use code-assist on this account inn any of the official integrations first, after login there this should work in nanocode.")
+            raise RuntimeError(f"User is not onboarded. This account state is not supported. Try to use code-assist on this account in any of the official integrations first, after logging it trough one of official products it should start to work in nanocode too.")
         CACHE["project_id"] = load_response.get("cloudaicompanionProject")
     url = f"{CODE_ASSIST_API_BASE}:generateContent"
     headers = {
@@ -533,7 +533,7 @@ def gemini_generate_content_int(
         raise RuntimeError("Invalid authentication method specified.")
 
     body = {
-        "system_instruction": {"parts": {"text": system_prompt}},
+        "system_instruction": {"parts": [{"text": system_prompt}]},
         "contents": contents,
         "generationConfig": {"maxOutputTokens": int(max_output_tokens)},
         "tools": [{"function_declarations": make_function_declarations()}],
@@ -712,7 +712,7 @@ def parse_args():
         "--auth_mode",
         default="key",
         choices=["key", "oauth2", "code_assist"],
-        help="Select authentication method, API key is simple, but have lower limits for a free tier: key (default), oauth2.",
+        help="Select authentication method, API key is simpler, but has lower limits for a free tier: key (default), oauth2, code_assist.",
     )
     return p.parse_args()
 

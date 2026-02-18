@@ -59,7 +59,7 @@ These data is public anyway, so I think it is not a problem to write it here, th
 - `OAUTH_CLIENT_ID`: `681255809395-oo8ft2oprdrnp9e3aqf6av3hmdib135j.apps.googleusercontent.com`
 - `OAUTH_CLIENT_SECRET`: `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`
 
-For project ID you may use your own (described below or [here](https://geminicli.com/docs/get-started/authentication/#set-your-google-cloud-project)), or just rely on default `cloudshell-gca` project id (same as fallback in gemini-cli). Both ways are tested.
+For project ID you may use your own (described below or [here](https://geminicli.com/docs/get-started/authentication/#set-your-google-cloud-project)), or just rely on default project id (same as fallback in gemini-cli). Code-Assist now rely on `loadCodeAssit` call to get real gcloud project ID, and only default now works (I think you need to have paid plan to use it on your own gcloud project). It is better to rely on default, but old `cloudshell-gca` work as `"project_id"` value for `client_secret.json`. Only default fallback is tested.
 
 ##### Creating client\_secret.json
 
