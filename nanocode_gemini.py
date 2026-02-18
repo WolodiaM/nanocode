@@ -44,6 +44,8 @@ DEFAULT_MODEL = "gemini-3-flash-preview"
 GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta"
 # Gemini code_assist REST endpoint (v1internal)
 CODE_ASSIST_API_BASE = "https://cloudcode-pa.googleapis.com/v1internal"
+# Helper for code assist
+CODE_ASSIST_UUID = uuid.uuid4()
 # OAuth2 credentials
 GEMINI_OAUTH2_SCOPES = ["https://www.googleapis.com/auth/generative-language.retriever"]
 CODE_ASSIST_OAUTH2_SCOPES = ["https://www.googleapis.com/auth/cloud-platform", "https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile", "openid"]
@@ -413,6 +415,36 @@ def gemini_get_oauth2_credentials(scopes):
     except ImportError:
         raise RuntimeError("Missing google-auth and google-auth-oauthlib libraries. Cannot login via OAuth2")
 
+def load_code_assist(creds):
+    """
+     Calls:
+        POST https://cloudcode-ppa.googleapis.com/v1internal:loadCodeAssist
+     """
+    url = f"{CODE_ASSIST_API_BASE}:loadCodeAssist"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {creds.token}",
+        "User-Agent": "GeminiCLI/0.29.0 (linux; x64)" # Mimic the CLI's user agent
+    }
+    body = {
+        "metadata": {
+            "ideType": "IDE_UNSPECIFIED",
+            "platform": "PLATFORM_UNSPECIFIED",
+            "pluginType": "GEMINI"
+        }
+    }
+    project_id = os.environ.get("GOOGLE_CLOUD_PROJECT") or None
+    if  project_id:
+        body["cloudaicompanionProject"] = project_id,
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(body).encode("utf-8"),
+        headers=headers,
+        method="POST",
+    )
+    with urllib.request.urlopen(req) as resp:
+        return json.loads(resp.read().decode("utf-8"))
+
 def gemini_generate_content_code_assist(
     contents: List[Dict[str, Any]],
     system_prompt: str,
@@ -422,16 +454,22 @@ def gemini_generate_content_code_assist(
 ) -> Dict[str, Any]:
     """
     Calls:
-      POST https://cloudcode-pa.googleapis.com/v1internal/:generateContent
+      POST https://cloudcode-pa.googleapis.com/v1internal:generateContent
     """
     creds = gemini_get_oauth2_credentials(CODE_ASSIST_OAUTH2_SCOPES)
+    load_response = load_code_assist(creds)
+    if not load_response.get("currentTier"):
+        raise RuntimeError(f"User is not onboarded. This is  not supported. Try to use code-assist on this account inn any of the official integrations first, after login there this should work in nanocode.")
+    project_id_from_server = load_response.get("cloudaicompanionProject")
     url = f"{CODE_ASSIST_API_BASE}:generateContent"
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {creds.token}"
+        "Authorization": f"Bearer {creds.token}",
+        "User-Agent": f"GeminiCLI/0.29.0/{model} (linux; x64)" # Mimic the CLI's user agent
     }
     request = {
-        "systemInstruction": {"parts": {"text": system_prompt}},
+        "session_id": str(CODE_ASSIST_UUID),
+        "systemInstruction": {"role": "user", "parts": {"text": system_prompt}},
         "contents": contents,
         "generationConfig": {"maxOutputTokens": int(max_output_tokens)},
         "tools": [{"function_declarations": make_function_declarations()}],
@@ -439,7 +477,7 @@ def gemini_generate_content_code_assist(
     }
     body = {
         "model": model,
-        "project": os.environ.get("GOOGLE_CLOUD_PROJECT", "cloudshell-gca"),
+        "project": project_id_from_server,
         "user_prompt_id": str(uuid.uuid4()),
         "request": request,
     }
