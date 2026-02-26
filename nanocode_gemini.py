@@ -796,6 +796,7 @@ def main():
                 if calls and model_content:
                     # Append the model content that contains the functionCall(s)
                     contents.append(model_content)
+                    parts = []
 
                     for call in calls:
                         tool_name = call["name"]
@@ -811,21 +812,23 @@ def main():
                         elif len(preview) > 60:
                             preview += "..."
                         print(f"  {DIM}⎿  {preview}{RESET}")
-
-                        # Send the tool result back as a functionResponse part
-                        contents.append(
+                        # Multiple tool calls should be formatted as multiple entries in parts array. This was found accidentally by trying it (because API was throwing errors for responses when multiple calls were in one message)
+                        parts.append(
                             {
-                                "role": "user",
-                                "parts": [
-                                    {
-                                        "functionResponse": {
-                                            "name": tool_name,
-                                            "response": {"result": result},
-                                        }
-                                    }
-                                ],
+                                "functionResponse": {
+                                    "name": tool_name,
+                                    "response": {"result": result},
+                                }
                             }
                         )
+
+                    # Send the tool result back as a functionResponse part
+                    contents.append(
+                        {
+                            "role": "user",
+                            "parts": parts,
+                        }
+                    )
 
                     # Continue loop: model should now incorporate tool outputs
                     continue
